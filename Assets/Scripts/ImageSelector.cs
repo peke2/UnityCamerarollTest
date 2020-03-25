@@ -28,7 +28,7 @@ public class ImageSelector : MonoBehaviour
 		imgSel.CallStatic("selectImage");
 	}
 
-	public void OnSelected(string path)
+	public void OnSelected(string nouse)
 	{
 		// Debug.Log(path);
 		// path = path.Replace("/storage/emulated/0", "/storage/self/primary");
@@ -71,74 +71,4 @@ public class ImageSelector : MonoBehaviour
 
 	}
 
-
-	IEnumerator LoadImage(string path)
-	{
-		// if(!System.IO.File.Exists(path)){
-		// 	Debug.Log($"File no exists[{path}]");
-		// 	yield break;
-		// }
-		// Debug.Log($"asset path=[{Application.streamingAssetsPath}]");
-
-		// using( UnityWebRequest req = UnityWebRequestTexture.GetTexture(path) ){
-		// 	yield return req.SendWebRequest();
-		// 	if( !req.isNetworkError && !req.isHttpError ){
-		// 		Debug.Log("読み込み完了");
-				
-		// 		Texture tex;
-		// 		while( (tex = DownloadHandlerTexture.GetContent(req)) == null ){
-		// 			yield return new WaitForEndOfFrame();
-		// 		}
-
-		// 		Debug.Log("テクスチャ取得完了");
-
-		// 		LoadedTexture = tex;
-		// 		var obj = GameObject.Find("ImageBoard");
-		// 		var mat = obj.GetComponent<Material>();
-		// 		mat.SetTexture("_MainTex", LoadedTexture);
-		// 	}
-		// 	else{
-		// 		Debug.Log($"ファイル読み込み失敗[{path}][{req.error}]");
-		// 	}
-		// }
-
-		if( System.IO.File.Exists(path) ){
-			Debug.Log($"ファイル有り[{path}]");
-		}
-		else{
-			Debug.Log($"ファイル無し[{path}]");
-		}
-
-		// string checkPath;
-		// using (AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
-		// {
-		// 	using (AndroidJavaObject currentActivity = jc.GetStatic<AndroidJavaObject>("currentActivity"))
-		// 	{
-		// 		checkPath = currentActivity.Call<AndroidJavaObject>("getFilesDir").Call<string>("getCanonicalPath");
-		// 	}
-		// }
-		// Debug.Log($"チェックパス[{checkPath}]");
-		
-		// var bytes = File.ReadAllBytes(path);
-		byte[] bytes;
-		using(var fs = File.OpenRead(path)){
-			using(var reader = new BinaryReader(fs)){
-				bytes = reader.ReadBytes((int)fs.Length);
-			}			
-		}
-
-		Debug.Log($"filesize = [{bytes.Length}]");
-		
-		var tex = new Texture2D(1,1);
-		tex.LoadImage(bytes);
-		// var obj = GameObject.Find("ImageBoard");
-
-		// var renderer = obj.GetComponent<Renderer>();
-		// renderer.material.mainTexture = tex;
-		if( OnLoaded != null ){
-			OnLoaded(tex);
-		}
-
-		yield break;
-	}
 }

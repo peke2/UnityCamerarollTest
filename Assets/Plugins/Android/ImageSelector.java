@@ -8,10 +8,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.widget.Button;
-import android.view.View;
 import android.net.Uri;
 
 import java.io.InputStream;
@@ -60,50 +57,31 @@ public class ImageSelector extends UnityPlayerActivity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent){
-		if(requestCode!=REQUEST_IMAGE_GET || resultCode!= RESULT_OK) return;
-		Uri uri = intent.getData();
+        if(requestCode!=REQUEST_IMAGE_GET || resultCode!= RESULT_OK) return;
+        Uri uri = intent.getData();
 
-		// selectedUri = uri;
-
-		// System.out.println("mylog:"+uri.toString());
-
-		String id = DocumentsContract.getDocumentId(uri);
-        String[] ids = id.split(":");
-        String sid = ids[ids.length-1];
-
-		ContentResolver cres = getContentResolver();
-		// cres.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Cursor csr = cres.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            new String[]{MediaStore.Images.Media.DATA},
-            "_id=?",
-            new String[]{sid},
-			null
-        );
-
-		String filePath = "";
+        String[] columns = new String[]{MediaStore.Images.Media.SIZE};
+        Cursor csr = getContentResolver().query(uri, columns, null,null,null);
 
         if( csr.moveToFirst() ){
-            filePath = csr.getString(0);
-        }
+            int sizeIndex = csr.getColumnIndex(MediaStore.Images.Media.SIZE);
+			int fileSize = csr.getInt(sizeIndex);
+
+			try{
+				InputStream input = getContentResolver().openInputStream(uri);
+				loadedData = new byte[fileSize];
+				input.read(loadedData,0, fileSize);
+				input.close();
+				System.out.println("mylog:Load completed");
+			}
+			catch (Exception e){
+				System.out.println("mylog:" + e.getMessage());
+			}
+
+		}
         csr.close();
 
-		long fileSize = new File(filePath).length();
-		try{
-			InputStream input = cres.openInputStream(uri);
-			loadedData = new byte[(int)fileSize];
-			input.read(loadedData,0, (int)fileSize);
-			input.close();
-			System.out.println("mylog:Load completed");
-		}
-		catch (Exception e){
-			System.out.println("mylog:" + e.getMessage());
-		}
-
-
-		//System.out.println(String.format("mylog:画像パス[%s]", uri.toString()));
 		//	Unity側で起動しているオブジェクトにメッセージを送る
-		// UnityPlayer.UnitySendMessage("ImageSelector", "OnSelected", filePath);
-		UnityPlayer.UnitySendMessage("ImageSelector", "OnSelected", Long.toString(fileSize));
+		UnityPlayer.UnitySendMessage("ImageSelector", "OnSelected", "");
 	}
 }
